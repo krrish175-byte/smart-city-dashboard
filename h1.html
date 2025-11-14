@@ -5,438 +5,254 @@
   <title>SmartCity Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Poppins font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      background: #f4f5fb;
-      color: #111827;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 24px 12px 40px;
-    }
-
-    .shell {
-      width: 100%;
-      max-width: 1160px;
-    }
-
-    /* top nav */
-    .top-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 18px;
-      background: #ffffff;
-      border-radius: 18px;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-      margin-bottom: 18px;
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logo-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, #4f46e5, #ec4899);
-    }
-
-    .brand-name {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .nav-center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      padding: 0 16px;
-    }
-
-    .search-shell {
-      width: 100%;
-      max-width: 480px;
-      background: #f9fafb;
-      border-radius: 999px;
-      padding: 6px 14px;
-      border: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .search-shell span {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      white-space: nowrap;
-    }
-
-    #citySelect {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 0.9rem;
-      color: #111827;
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-    }
-
-    .error {
-      color: #ef4444;
-      font-size: 0.85rem;
-      margin: 6px 4px;
-      min-height: 18px;
-    }
-
-    /* hero row */
-    .hero-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .hero-left {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 16px 18px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .date-text {
-      font-size: 0.85rem;
-      color: #6b7280;
-    }
-
-    .city-name {
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .time-text {
-      font-size: 0.95rem;
-      color: #6b7280;
-    }
-
-    .hero-right {
-      display: grid;
-      grid-template-columns: 2.1fr 1.2fr;
-      gap: 12px;
-    }
-
-    .temp-card {
-      background: linear-gradient(135deg, #4f46e5, #38bdf8);
-      border-radius: 18px;
-      padding: 20px 22px;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 4px;
-      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.35);
-    }
-
-    .temp-value {
-      font-size: 2.4rem;
-      font-weight: 600;
-    }
-
-    .temp-desc {
-      font-size: 0.95rem;
-      opacity: 0.9;
-    }
-
-    .mini-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .mini-card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 10px 14px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-    }
-
-    .mini-label {
-      font-size: 0.8rem;
-      color: #6b7280;
-    }
-
-    .mini-value {
-      margin-top: 4px;
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #111827;
-    }
-
-    /* metrics row */
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .metric-card {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 12px 16px 14px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .metric-title {
-      font-size: 0.85rem;
-      color: #6b7280;
-    }
-
-    .metric-main {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .metric-sub {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      margin-top: 2px;
-    }
-
-    .metric-sub span:first-child {
-      color: #6b7280;
-    }
-
-    .metric-status.good {
-      color: #22c55e;
-    }
-
-    .metric-status.moderate {
-      color: #eab308;
-    }
-
-    .metric-status.bad {
-      color: #ef4444;
-    }
-
-    /* pollution chart section */
-    .pollution-section {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 14px 18px 18px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-    }
-
-    .pollution-header-title {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #111827;
-    }
-
-    .pollution-subtitle {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      margin-bottom: 6px;
-    }
-
-    .chart-wrapper {
-      position: relative;
-      width: 100%;
-      height: 260px;
-    }
-
-    @media (max-width: 768px) {
-      .hero-row {
-        grid-template-columns: 1fr;
-      }
-      .hero-right {
-        grid-template-columns: 1.3fr 1.1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .top-nav {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-      .nav-center {
-        order: 3;
-        padding: 0;
-      }
-      .nav-right {
-        align-self: flex-end;
-      }
-      .hero-right {
-        grid-template-columns: 1fr;
-      }
-      .chart-wrapper {
-        height: 230px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="shell">
-    <!-- top nav -->
-    <header class="top-nav">
-      <div class="nav-left">
-        <div class="logo-badge"></div>
-        <span class="brand-name">SmartCity</span>
-      </div>
-
-      <div class="nav-center">
-        <div class="search-shell">
-          <span>Search for a city...</span>
-          <select id="citySelect">
-            <option value="mumbai">Mumbai, India</option>
-            <option value="delhi">Delhi, India</option>
-            <option value="london">London, UK</option>
-            <option value="newyork">New York, USA</option>
-            <option value="tokyo">Tokyo, Japan</option>
-            <option value="paris">Paris, France</option>
-            <option value="sydney">Sydney, Australia</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="nav-right">
-        <button class="icon-btn" id="refreshBtn" title="Refresh"></button>
-        <button class="icon-btn" title="Profile"></button>
-      </div>
-    </header>
-
-    <div id="error" class="error"></div>
-
-    <!-- hero row -->
-    <section class="hero-row">
-      <div class="hero-left">
-        <p class="date-text" id="dateText">Friday, November 14, 2025</p>
-        <h2 class="city-name" id="cityName">San Francisco</h2>
-        <p class="time-text" id="timeText">10:47 PM</p>
-      </div>
-
-      <div class="hero-right">
-        <div class="temp-card">
-          <div class="temp-value" id="tempValue">72°</div>
-          <div class="temp-desc" id="tempDesc">Partly Cloudy</div>
-        </div>
-        <div class="mini-column">
-          <div class="mini-card">
-            <div class="mini-label">Humidity</div>
-            <div class="mini-value" id="humidityValue">68%</div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-label">Wind Speed</div>
-            <div class="mini-value" id="windValue">12 km/h</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- metrics row -->
-    <section class="metrics-row">
-      <div class="metric-card">
-        <div class="metric-title">Air Quality Index</div>
-        <div class="metric-main" id="aqiNumber">--</div>
-        <div class="metric-sub">
-          <span>AQI</span>
-          <span id="aqiStatus" class="metric-status">--</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-title">Traffic Congestion</div>
-        <div class="metric-main" id="trafficPercent">--%</div>
-        <div class="metric-sub">
-          <span>Avg speed</span>
-          <span id="trafficLabel" class="metric-status moderate">--</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-title">Public Safety Index</div>
-        <div class="metric-main" id="safetyIndex">92</div>
-        <div class="metric-sub">
-          <span>Current level</span>
-          <span class="metric-status good" id="safetyLabel">Excellent</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-title">Energy Consumption</div>
-        <div class="metric-main" id="energyValue">1247 MW</div>
-        <div class="metric-sub">
-          <span>Status</span>
-          <span class="metric-status" id="energyLabel">Normal</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- pollution chart -->
-    <section class="pollution-section">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
-        <div>
-          <div class="pollution-header-title">Pollution Levels</div>
-          <div class="pollution-subtitle">7-day trend analysis (sampled from current data)</div>
-        </div>
-        <div style="font-size:0.8rem;color:#6b7280;">
-          <span style="margin-right:10px;">● PM2.5</span>
-          <span style="margin-right:10px;">● PM10</span>
-          <span>● NO₂</span>
-        </div>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="pollutionChart"></canvas>
-      </div>
-    </section>
-  </div>
+  <!-- Anime.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Logic -->
-  <script src="h1.js"></script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins"; }
+
+    body {
+      background:#f4f5fb;
+      padding:24px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .shell { width:100%; max-width:1200px; }
+
+    /* NAV */
+    .top-nav {
+      background:#fff;
+      padding:12px 20px;
+      border-radius:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.05);
+    }
+
+    .logo-badge {
+      width:28px; height:28px; border-radius:10px;
+      background:linear-gradient(135deg,#4f46e5,#ec4899);
+    }
+
+    .brand-name { font-weight:600; }
+
+    .search-shell {
+      background:#f9fafb;
+      padding:8px 14px;
+      border-radius:999px;
+      border:1px solid #e5e7eb;
+      display:flex;
+      gap:6px;
+      max-width:480px;
+      width:100%;
+    }
+
+    #citySelect {
+      border:none; outline:none; background:none;
+      font-size:0.95rem;
+      flex:1;
+    }
+
+    .icon-btn {
+      width:32px; height:32px;
+      border-radius:50%;
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .error { color:#ef4444; height:18px; margin-bottom:10px; }
+
+    /* HERO */
+    .hero-row {
+      display:grid;
+      grid-template-columns:1.4fr 1.6fr;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .hero-left {
+      background:#fff;
+      padding:20px;
+      border-radius:16px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.05);
+    }
+
+    .hero-right {
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:14px;
+    }
+
+    .temp-card {
+      background:linear-gradient(135deg,#4f46e5,#38bdf8);
+      color:#fff;
+      border-radius:16px;
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.15);
+    }
+    .temp-value { font-size:2.5rem; font-weight:600; }
+
+    .mini-card {
+      background:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.05);
+    }
+
+    /* METRICS */
+    .metrics-row {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .metric-card {
+      background:#fff;
+      padding:16px;
+      border-radius:16px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.05);
+    }
+
+    .metric-main { font-size:1.5rem; font-weight:600; }
+
+    .metric-status.good { color:#22c55e; }
+    .metric-status.moderate { color:#eab308; }
+    .metric-status.bad { color:#ef4444; }
+
+    /* CHART */
+    .pollution-section {
+      background:#fff;
+      padding:18px;
+      border-radius:16px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.05);
+    }
+
+    .chart-wrapper {
+      height:260px; margin-top:10px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- NAV -->
+  <header class="top-nav">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="logo-badge"></div>
+      <span class="brand-name">SmartCity</span>
+    </div>
+
+    <div class="search-shell">
+      <span style="color:#999; font-size:0.85rem;">Search for a city...</span>
+      <select id="citySelect">
+        <option value="mumbai">Mumbai, India</option>
+        <option value="delhi">Delhi, India</option>
+        <option value="london">London, UK</option>
+        <option value="newyork">New York, USA</option>
+        <option value="tokyo">Tokyo, Japan</option>
+        <option value="paris">Paris, France</option>
+        <option value="sydney">Sydney, Australia</option>
+      </select>
+    </div>
+
+    <div>
+      <button class="icon-btn" id="refreshBtn"></button>
+    </div>
+  </header>
+
+  <div id="error" class="error"></div>
+
+  <!-- HERO -->
+  <section class="hero-row">
+
+    <div class="hero-left">
+      <p id="dateText">Date</p>
+      <h2 id="cityName">City</h2>
+      <p id="timeText">Time</p>
+    </div>
+
+    <div class="hero-right">
+      <div class="temp-card">
+        <div class="temp-value" id="tempValue">--°</div>
+        <div class="temp-desc" id="tempDesc">--</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="mini-card">
+          <div>Humidity</div>
+          <div id="humidityValue">--%</div>
+        </div>
+        <div class="mini-card">
+          <div>Wind Speed</div>
+          <div id="windValue">-- km/h</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- METRICS -->
+  <section class="metrics-row">
+
+    <div class="metric-card">
+      <div class="metric-title">Air Quality Index</div>
+      <div class="metric-main" id="aqiNumber">--</div>
+      <div style="font-size:0.85rem;">
+        <span>AQI: </span>
+        <span id="aqiStatus" class="metric-status">--</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Traffic Congestion</div>
+      <div class="metric-main" id="trafficPercent">--%</div>
+      <div style="font-size:0.85rem;">
+        <span>Avg Speed: </span>
+        <span id="trafficLabel" class="metric-status">--</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Public Safety Index</div>
+      <div class="metric-main" id="safetyIndex">--</div>
+      <div id="safetyLabel" class="metric-status">--</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-title">Energy Consumption</div>
+      <div class="metric-main" id="energyValue">-- MW</div>
+      <div id="energyLabel" class="metric-status">--</div>
+    </div>
+
+  </section>
+
+  <!-- CHART -->
+  <section class="pollution-section">
+    <div style="font-weight:600;">Pollution Levels</div>
+    <div class="chart-wrapper"><canvas id="pollutionChart"></canvas></div>
+  </section>
+
+</div>
+
+<script src="h1.js"></script>
+
 </body>
 </html>

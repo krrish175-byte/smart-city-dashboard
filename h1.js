@@ -1,55 +1,43 @@
-// ===== CONFIG =====
-const API_KEY = "be1b627ecabbe5e8522b8edb35542fd1"; // <- put your OpenWeather key
+// =========================
+//  CONFIG + CONSTANTS
+// =========================
 
+// put your OpenWeather key here
+const OPENWEATHER_KEY = "be1b627ecabbe5e8522b8edb35542fd1";
+
+// TomTom Traffic API
+const TOMTOM_KEY = "iN9VrxKgPUlht88S0AsMCk2p9w4l9hJY";
+
+// City list
 const CITIES = {
-  mumbai:  { name: "Mumbai, India",      lat: 19.0760, lon: 72.8777 },
-  delhi:   { name: "Delhi, India",       lat: 28.6139, lon: 77.2090 },
-  london:  { name: "London, UK",         lat: 51.5072, lon: -0.1276 },
-  newyork: { name: "New York, USA",      lat: 40.7128, lon: -74.0060 },
-  tokyo:   { name: "Tokyo, Japan",       lat: 35.6895, lon: 139.6917 },
-  paris:   { name: "Paris, France",      lat: 48.8566, lon: 2.3522 },
-  sydney:  { name: "Sydney, Australia",  lat: -33.8688, lon: 151.2093 },
+  mumbai:  { name: "Mumbai, India", lat: 19.0760, lon: 72.8777 },
+  delhi:   { name: "Delhi, India",  lat: 28.6139, lon: 77.2090 },
+  london:  { name: "London, UK", lat: 51.5072, lon: -0.1276 },
+  newyork: { name: "New York, USA", lat: 40.7128, lon: -74.0060 },
+  tokyo:   { name: "Tokyo, Japan", lat: 35.6895, lon: 139.6917 },
+  paris:   { name: "Paris, France", lat: 48.8566, lon: 2.3522 },
+  sydney:  { name: "Sydney, Australia", lat: -33.8688, lon: 151.2093 }
 };
 
-// simple mock traffic (avg city speeds)
-const TRAFFIC_DATA = {
-  mumbai:  { speed: 18, level: "Heavy" },
-  delhi:   { speed: 22, level: "Heavy" },
-  london:  { speed: 35, level: "Moderate" },
-  newyork: { speed: 30, level: "Moderate" },
-  tokyo:   { speed: 45, level: "Light" },
-  paris:   { speed: 32, level: "Moderate" },
-  sydney:  { speed: 50, level: "Free flow" },
-};
-
-// mock public safety index (0–100)
-const SAFETY_DATA = {
-  mumbai:  { index: 68, label: "Average" },
-  delhi:   { index: 60, label: "Average" },
-  london:  { index: 88, label: "Excellent" },
-  newyork: { index: 82, label: "Good" },
-  tokyo:   { index: 94, label: "Excellent" },
-  paris:   { index: 80, label: "Good" },
-  sydney:  { index: 90, label: "Excellent" },
-};
-
-// mock energy consumption (in MW)
-const ENERGY_DATA = {
+// Hardcoded energy values
+const ENERGY_MOCK = {
   mumbai:  { value: 1850, label: "High" },
-  delhi:   { value: 1720, label: "High" },
-  london:  { value: 1350, label: "Normal" },
-  newyork: { value: 1600, label: "High" },
+  delhi:   { value: 1600, label: "High" },
+  london:  { value: 1200, label: "Normal" },
+  newyork: { value: 1500, label: "High" },
   tokyo:   { value: 1900, label: "High" },
-  paris:   { value: 1200, label: "Normal" },
-  sydney:  { value: 950,  label: "Normal" },
+  paris:   { value: 1100, label: "Normal" },
+  sydney:  { value: 900,  label: "Low" }
 };
 
-// ===== DOM =====
+// =========================
+//  DOM ELEMENTS
+// =========================
+
 const citySelect   = document.getElementById("citySelect");
 const refreshBtn   = document.getElementById("refreshBtn");
 const errorBox     = document.getElementById("error");
 
-// hero
 const dateText      = document.getElementById("dateText");
 const cityNameEl    = document.getElementById("cityName");
 const timeText      = document.getElementById("timeText");
@@ -58,7 +46,6 @@ const tempDesc      = document.getElementById("tempDesc");
 const humidityValue = document.getElementById("humidityValue");
 const windValue     = document.getElementById("windValue");
 
-// metrics: AQI + traffic + safety + energy
 const aqiNumber     = document.getElementById("aqiNumber");
 const aqiStatus     = document.getElementById("aqiStatus");
 const trafficPercent = document.getElementById("trafficPercent");
@@ -68,230 +55,200 @@ const safetyLabelEl  = document.getElementById("safetyLabel");
 const energyValueEl  = document.getElementById("energyValue");
 const energyLabelEl  = document.getElementById("energyLabel");
 
-// chart
 const pollutionCanvas = document.getElementById("pollutionChart");
-let pollutionChartInstance = null;
+let pollutionChart = null;
 
-// ===== HELPERS =====
-function setLoading(state) {
-  refreshBtn.disabled = state;
-  refreshBtn.style.opacity = state ? "0.6" : "1";
-}
+// =========================
+//  HELPERS
+// =========================
 
 function setError(msg) {
   errorBox.textContent = msg || "";
 }
 
+function safeText(el, text) {
+  if (!el) return;
+  el.textContent = text;
+}
+
 function aqiLabel(aqi) {
   if (!aqi) return "--";
-  if (aqi === 1) return "Good";
-  if (aqi === 2) return "Fair";
-  if (aqi === 3) return "Moderate";
-  if (aqi === 4) return "Poor";
-  return "Very Poor";
+  return ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"][aqi];
 }
 
 function aqiStatusClass(aqi) {
   if (!aqi) return "";
-  if (aqi <= 2) return "good";
-  if (aqi === 3) return "moderate";
-  return "bad";
+  if (aqi === 1) return "good";
+  if (aqi === 2) return "moderate";
+  if (aqi >= 3) return "bad";
 }
 
-// congestion % from speed (0–100)
 function congestionPercent(speed) {
-  const maxSpeed = 60;
-  const ratio = Math.max(0, Math.min(1, speed / maxSpeed));
-  return Math.round((1 - ratio) * 100);
+  const max = 60;
+  const r = Math.max(0, Math.min(speed / max, 1));
+  return Math.round((1 - r) * 100);
 }
 
-// build simple 7-day trend from a base value
-function makeTrend(base) {
-  if (!base || base <= 0) return [0, 0, 0, 0, 0, 0, 0];
-  const vals = [];
-  for (let i = -2; i <= 4; i++) {
-    vals.push(Math.max(0, base + i * 1.2));
+function makeTrendFromCurrent(val) {
+  const base = val || 0;
+  return [
+    base * 0.85,
+    base * 0.92,
+    base,
+    base * 1.05,
+    base * 1.12,
+    base * 0.97,
+    base * 0.9
+  ].map(v => Math.round(v));
+}
+
+// =========================
+//  API Fetchers
+// =========================
+
+async function fetchTraffic(lat, lon) {
+  try {
+    const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&unit=KMPH&key=${TOMTOM_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.flowSegmentData || null;
+  } catch {
+    return null;
   }
-  return vals;
 }
 
-// ===== CHART =====
-function updatePollutionChart(components) {
-  const pm25 = components.pm2_5 ?? 0;
-  const pm10 = components.pm10 ?? 0;
-  const no2  = components.no2  ?? 0;
-
-  const labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  const pm25Trend = makeTrend(pm25);
-  const pm10Trend = makeTrend(pm10);
-  const no2Trend  = makeTrend(no2);
-
-  if (pollutionChartInstance) {
-    pollutionChartInstance.data.datasets[0].data = pm25Trend;
-    pollutionChartInstance.data.datasets[1].data = pm10Trend;
-    pollutionChartInstance.data.datasets[2].data = no2Trend;
-    pollutionChartInstance.update();
-    return;
+async function fetchAQIData(lat, lon) {
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.list?.[0] || null;
+  } catch {
+    return null;
   }
-
-  pollutionChartInstance = new Chart(pollutionCanvas, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "PM2.5", data: pm25Trend, tension: 0.4, pointRadius: 3 },
-        { label: "PM10", data: pm10Trend, tension: 0.4, pointRadius: 3 },
-        { label: "NO₂",  data: no2Trend,  tension: 0.4, pointRadius: 3 },
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          ticks: { color: "#6b7280", font: { size: 11 } },
-          grid: { color: "#e5e7eb" }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: "#6b7280", font: { size: 11 } },
-          grid: { color: "#f3f4f6" }
-        }
-      },
-      plugins: {
-        legend: {
-          labels: { color: "#4b5563", font: { size: 12 } }
-        }
-      },
-      elements: {
-        line: { borderWidth: 2 }
-      }
-    }
-  });
 }
 
-// ===== MAIN LOGIC =====
+// =========================
+//  CHART
+// =========================
+
+function createOrUpdateChart(labels, pm25, pm10, no2) {
+  if (!pollutionChart) {
+    pollutionChart = new Chart(pollutionCanvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "PM2.5", data: pm25, borderWidth: 2 },
+          { label: "PM10", data: pm10, borderWidth: 2 },
+          { label: "NO₂", data: no2, borderWidth: 2 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  } else {
+    pollutionChart.data.labels = labels;
+    pollutionChart.data.datasets[0].data = pm25;
+    pollutionChart.data.datasets[1].data = pm10;
+    pollutionChart.data.datasets[2].data = no2;
+    pollutionChart.update();
+  }
+}
+
+// =========================
+//  MAIN LOGIC
+// =========================
+
 async function loadCity() {
   const key = citySelect.value;
   const city = CITIES[key];
-  if (!city) {
-    setError("Unknown city.");
-    return;
-  }
-
   setError("");
-  setLoading(true);
 
   try {
-    // ---- weather ----
-    const weatherUrl =
-      `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&units=metric&appid=${API_KEY}`;
-    const weatherRes = await fetch(weatherUrl);
-    if (!weatherRes.ok) {
-      const t = await weatherRes.text();
-      console.error("Weather error", weatherRes.status, t);
-      throw new Error("Weather API error.");
-    }
-    const weatherData = await weatherRes.json();
-
-    const temp      = weatherData.main?.temp;
-    const feels     = weatherData.main?.feels_like;
-    const humidity  = weatherData.main?.humidity;
-    const desc      = weatherData.weather?.[0]?.description || "N/A";
-    const windMs    = weatherData.wind?.speed ?? 0;
+    // ---- WEATHER ----
+    const wURL = `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&units=metric&appid=${OPENWEATHER_KEY}`;
+    const wRes = await fetch(wURL);
+    if (!wRes.ok) throw new Error("Weather error");
+    const w = await wRes.json();
 
     const now = new Date();
-    dateText.textContent = now.toLocaleDateString(undefined, {
-      weekday: "long", month: "long", day: "numeric", year: "numeric"
-    });
-    timeText.textContent = now.toLocaleTimeString(undefined, {
-      hour: "2-digit", minute: "2-digit"
-    });
-    cityNameEl.textContent = city.name;
+    safeText(dateText, now.toLocaleDateString(undefined, {
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    }));
+    safeText(timeText, now.toLocaleTimeString());
+    safeText(cityNameEl, city.name);
 
-    tempValue.textContent = temp !== undefined ? `${Math.round(temp)}°` : "--°";
-    tempDesc.textContent  = desc.charAt(0).toUpperCase() + desc.slice(1);
-    humidityValue.textContent = humidity != null ? `${humidity}%` : "--%";
-    const windKmh = windMs * 3.6;
-    windValue.textContent = `${windKmh.toFixed(1)} km/h`;
+    safeText(tempValue, `${Math.round(w.main.temp)}°`);
+    safeText(tempDesc, w.weather?.[0]?.description || "");
+    safeText(humidityValue, `${w.main.humidity}%`);
+    safeText(windValue, `${(w.wind.speed * 3.6).toFixed(1)} km/h`);
 
-    // ---- air quality ----
-    let aqi = null;
-    let comps = {};
-    try {
-      const airUrl =
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${city.lat}&lon=${city.lon}&appid=${API_KEY}`;
-      const airRes = await fetch(airUrl);
-      if (airRes.ok) {
-        const airData = await airRes.json();
-        aqi   = airData.list?.[0]?.main?.aqi ?? null;
-        comps = airData.list?.[0]?.components || {};
-      }
-    } catch (e) {
-      console.warn("Air fetch failed", e);
-    }
-
-    aqiNumber.textContent = aqi ? `AQI ${aqi}` : "--";
-    const label = aqiLabel(aqi);
-    aqiStatus.textContent = label;
+    // ---- AQI ----
+    const aq = await fetchAQIData(city.lat, city.lon);
+    const aqi = aq?.main?.aqi || null;
+    safeText(aqiNumber, aqi ? aqi : "--");
+    safeText(aqiStatus, aqiLabel(aqi));
     aqiStatus.className = "metric-status " + aqiStatusClass(aqi);
 
-    // ---- traffic (mock) ----
-    const tInfo = TRAFFIC_DATA[key];
-    if (tInfo) {
-      const percent = congestionPercent(tInfo.speed);
-      trafficPercent.textContent = `${percent}%`;
-      trafficLabel.textContent = `${tInfo.level} · ${tInfo.speed} km/h`;
-      trafficLabel.className =
-        "metric-status " +
-        (percent < 35 ? "good" : percent < 70 ? "moderate" : "bad");
+    const comps = aq?.components || {};
+    const pm25 = comps.pm2_5 || 0;
+    const pm10 = comps.pm10 || 0;
+    const no2  = comps.no2  || 0;
+
+    // ---- Traffic ----
+    const t = await fetchTraffic(city.lat, city.lon);
+    if (t?.currentSpeed != null) {
+      const speed = t.currentSpeed;
+      const c = congestionPercent(speed);
+      safeText(trafficPercent, `${c}%`);
+      const lvl = c < 35 ? "Light" : c < 70 ? "Moderate" : "Heavy";
+      safeText(trafficLabel, `${lvl} · ${speed} km/h`);
+      trafficLabel.className = "metric-status " + (c < 35 ? "good" : c < 70 ? "moderate" : "bad");
     } else {
-      trafficPercent.textContent = "--%";
-      trafficLabel.textContent = "No data";
-      trafficLabel.className = "metric-status";
+      safeText(trafficPercent, "--%");
+      safeText(trafficLabel, "No data");
     }
 
-    // ---- public safety (mock per city) ----
-    const sInfo = SAFETY_DATA[key];
-    if (sInfo) {
-      safetyIndexEl.textContent = sInfo.index;
-      safetyLabelEl.textContent = sInfo.label;
-      let cls = "good";
-      if (sInfo.index < 60) cls = "bad";
-      else if (sInfo.index < 80) cls = "moderate";
-      safetyLabelEl.className = "metric-status " + cls;
-    } else {
-      safetyIndexEl.textContent = "--";
-      safetyLabelEl.textContent = "N/A";
-      safetyLabelEl.className = "metric-status";
-    }
+    // ---- Safety (mocked good) ----
+    safeText(safetyIndexEl, "100");
+    safeText(safetyLabelEl, "Excellent");
+    safetyLabelEl.className = "metric-status good";
 
-    // ---- energy consumption (mock per city) ----
-    const eInfo = ENERGY_DATA[key];
-    if (eInfo) {
-      energyValueEl.textContent = `${eInfo.value} MW`;
-      energyLabelEl.textContent = eInfo.label;
-      let cls = "good";
-      if (eInfo.label === "High") cls = "bad";
+    // ---- Energy (your fixed variables) ----
+    const en = ENERGY_MOCK[key];
+    if (en) {
+      safeText(energyValueEl, `${en.value} MW`);
+      safeText(energyLabelEl, en.label);
+      const cls = en.label === "High" ? "bad" : en.label === "Normal" ? "moderate" : "good";
       energyLabelEl.className = "metric-status " + cls;
     } else {
-      energyValueEl.textContent = "-- MW";
-      energyLabelEl.textContent = "N/A";
-      energyLabelEl.className = "metric-status";
+      safeText(energyValueEl, "-- MW");
+      safeText(energyLabelEl, "N/A");
     }
 
-    // ---- pollution chart ----
-    updatePollutionChart(comps);
+    // ---- Chart (fallback trend) ----
+    const labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    createOrUpdateChart(
+      labels,
+      makeTrendFromCurrent(pm25),
+      makeTrendFromCurrent(pm10),
+      makeTrendFromCurrent(no2)
+    );
 
   } catch (err) {
     console.error(err);
-    setError(err.message || "Something went wrong.");
-  } finally {
-    setLoading(false);
+    setError("Something went wrong while loading city data.");
   }
 }
 
-// events
-citySelect.addEventListener("change", loadCity);
-refreshBtn.addEventListener("click", loadCity);
-window.addEventListener("load", loadCity);
+// =========================
+//  EVENTS
+// =========================
+
+document.addEventListener("DOMContentLoaded", () => {
+  citySelect.addEventListener("change", loadCity);
+  refreshBtn.addEventListener("click", loadCity);
+  loadCity();
+});
