@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart City Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>Smart City Dashboard</h1>
+    <p>Weather & Air Quality Monitor</p>
+
+    <div class="input-box">
+        <input id="cityInput" type="text" placeholder="Enter city name...">
+        <button id="searchBtn">Search</button>
+    </div>
+
+    <div id="locationCard" class="card hidden">
+        <h2 id="cityName"></h2>
+        <p id="coords"></p>
+    </div>
+
+    <div id="weatherCard" class="card hidden">
+        <h3>Weather</h3>
+        <p id="weatherDescription"></p>
+        <p>Temperature: <span id="temp"></span> °C</p>
+        <p>Humidity: <span id="humidity"></span> %</p>
+
+        <canvas id="weatherChart"></canvas>
+    </div>
+
+    <div id="aqCard" class="card hidden">
+        <h3>Air Quality</h3>
+        <p id="aqIndex"></p>
+        <canvas id="aqChart"></canvas>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
